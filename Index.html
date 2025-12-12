@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura no Tempo com Tico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4ECDC4;
+            --secondary: #FF6B6B;
+            --accent: #FFD166;
+            --dark: #1A535C;
+            --light: #F7FFF7;
+            --purple: #9D4EDD;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Neue', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1A535C 0%, #4ECDC4 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #333;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--light);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 0 var(--accent);
+        }
+        
+        .logo-icon {
+            color: var(--secondary);
+            font-size: 2.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 3px 0 var(--dark);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            background-color: var(--secondary);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 var(--dark);
+        }
+        
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 80px);
+            padding: 1rem;
+            gap: 1rem;
+        }
+        
+        /* Map Container */
+        .map-container {
+            flex: 3;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #world-map {
+            width: 100%;
+            height: 100%;
+            background-color: #A8E6CF;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.7) 2px, transparent 2px),
+                radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.7) 1px, transparent 1px),
+                radial-gradient(circle at 40% 50%, rgba(255, 255, 255, 0.7) 3px, transparent 3px);
+            background-size: 50px 50px, 30px 30px, 70px 70px;
+        }
+        
+        /* Character */
+        .character {
+            position: absolute;
+            width: 120px;
+            height: 150px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 2s ease-in-out;
+        }
+        
+        .character-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .tico-head {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            top: 0;
+            left: 20px;
+            box-shadow: 0 5px 0 var(--dark);
+        }
+        
+        .tico-eye {
+            position: absolute;
+            width: 20px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            top: 25px;
+        }
+        
+        .left-eye {
+            left: 25px;
+        }
+        
+        .right-eye {
+            right: 25px;
+        }
+        
+        .tico-pupil {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--dark);
+            border-radius: 50%;
+            top: 8px;
+            left: 5px;
+            animation: blink 3s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 45%, 55%, 100% { height: 10px; top: 8px; }
+            50% { height: 2px; top: 16px; }
+        }
+        
+        .tico-smile {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            border: 5px solid var(--secondary);
+            border-top: none;
+            border-radius: 0 0 40px 40px;
+            bottom: 15px;
+            left: 20px;
+        }
+        
+        .tico-body {
+            position: absolute;
+            width: 70px;
+            height: 60px;
+            background-color: var(--accent);
+            border-radius: 40% 40% 10px 10px;
+            bottom: 0;
+            left: 25px;
+            box-shadow: 0 5px 0 var(--dark);
+        }
+        
+        .tico-hat {
+            position: absolute;
+            width: 60px;
+            height: 25px;
+            background-color: var(--purple);
+            border-radius: 20px 20px 0 0;
+            top: -10px;
+            left: 10px;
+            z-index: 1;
+        }
+        
+        .tico-hat-top {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--purple);
+            border-radius: 50%;
+            top: -15px;
+            left: 20px;
+        }
+        
+        /* Timeline */
+        .timeline-container {
+            flex: 1;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .timeline-title {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .timeline-slider {
+            width: 100%;
+            height: 60px;
+            position: relative;
+            background: linear-gradient(to right, #FFD166, #FF6B6B, #4ECDC4, #1A535C, #9D4EDD);
+            border-radius: 30px;
+            padding: 0 10px;
+        }
+        
+        .timeline-slider input {
+            width: 100%;
+            height: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+            outline: none;
+        }
+        
+        .timeline-slider input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 40px;
+            height: 70px;
+            background-color: var(--light);
+            border-radius: 10px;
+            border: 5px solid var(--dark);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        /* Speech Bubble */
+        .speech-bubble {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: white;
+            padding: 1.2rem;
+            border-radius: 20px;
+            max-width: 350px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            display: none;
+            border: 4px solid var(--accent);
+        }
+        
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 40px;
+            border-width: 20px 20px 0;
+            border-style: solid;
+            border-color: white transparent;
+        }
+        
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -27px;
+            left: 37px;
+            border-width: 24px 24px 0;
+            border-style: solid;
+            border-color: var(--accent) transparent;
+            z-index: -1;
+        }
+        
+        .speech-text {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .speech-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+        
+        /* Event Markers */
+        .event-marker {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transform: scale(1);
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+            animation: pulse 2s infinite;
+        }
+        
+        .event-marker:hover {
+            transform: scale(1.3);
+            background-color: var(--primary);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+        
+        /* Era Overlay */
+        .era-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 15;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .era-card {
+            background-color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.5s;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .era-title {
+            color: var(--dark);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .era-description {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 0.8rem;
+            z-index: 10;
+        }
+        
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--light);
+            border: none;
+            color: var(--dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--accent);
+        }
+        
+        .music-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Sound Effects */
+        .sound-effects {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+        
+        .sound-btn {
+            background-color: var(--light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: var(--dark);
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+            
+            .timeline-container {
+                height: 25vh;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .speech-bubble {
+                max-width: 250px;
+                left: 10px;
+                top: 10px;
+            }
+            
+            .character {
+                width: 80px;
+                height: 100px;
+            }
+            
+            .tico-head {
+                width: 50px;
+                height: 50px;
+                left: 15px;
+            }
+            
+            .tico-body {
+                width: 50px;
+                height: 40px;
+                left: 15px;
+            }
+        }
+        
+        /* Achievements */
+        .achievements {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            background-color: white;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            display: none;
+            z-index: 20;
+        }
+        
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+            background-color: #f0f9ff;
+        }
+        
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 90px;
+            left: 20px;
+            background-color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        /* Question Popup */
+        .question-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            z-index: 30;
+            display: none;
+            max-width: 500px;
+            text-align: center;
+            border: 5px solid var(--accent);
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .question-option {
+            background-color: var(--light);
+            border: 3px solid var(--primary);
+            padding: 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        .question-option:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-globe-americas"></i>
+            </div>
+            <h1>Aventura no Tempo com Tico</h1>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="startBtn">
+                <i class="fas fa-play"></i> Começar
+            </button>
+            <button class="nav-btn" id="achievementsBtn">
+                <i class="fas fa-trophy"></i> Conquistas
+            </button>
+            <button class="nav-btn" id="helpBtn">
+                <i class="fas fa-question-circle"></i> Ajuda
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="world-map">
+                <!-- Event Markers will be added here by JavaScript -->
+            </div>
+            
+            <!-- Character -->
+            <div class="character" id="ticoCharacter">
+                <div class="character-body">
+                    <div class="tico-hat"></div>
+                    <div class="tico-hat-top"></div>
+                    <div class="tico-head">
+                        <div class="tico-eye left-eye">
+                            <div class="tico-pupil"></div>
+                        </div>
+                        <div class="tico-eye right-eye">
+                            <div class="tico-pupil"></div>
+                        </div>
+                        <div class="tico-smile"></div>
+                    </div>
+                    <div class="tico-body"></div>
+                </div>
+            </div>
+            
+            <!-- Speech Bubble -->
+            <div class="speech-bubble" id="speechBubble">
+                <div class="speech-text" id="speechText">Olá! Eu sou o Tico! Vamos explorar a história do mundo juntos?</div>
+                <div class="speech-controls">
+                    <button class="control-btn" id="speakBtn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="control-btn" id="nextBtn">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Era Overlay -->
+            <div class="era-overlay" id="eraOverlay">
+                <div class="era-card">
+                    <h2 class="era-title" id="eraTitle">Primeiros Humanos</h2>
+                    <p class="era-description" id="eraDescription">Há milhares de anos, os primeiros humanos surgiram na África e começaram a explorar o mundo!</p>
+                    <button class="nav-btn" id="closeEraBtn">Continuar Aventura</button>
+                </div>
+            </div>
+            
+            <!-- Question Popup -->
+            <div class="question-popup" id="questionPopup">
+                <button class="close-btn" id="closeQuestionBtn">×</button>
+                <h3>Desafio Curioso!</h3>
+                <p class="question-text" id="questionText">Por que as primeiras civilizações surgiram perto de rios?</p>
+                <div class="question-options" id="questionOptions">
+                    <!-- Options will be added by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="musicBtn">
+                    <i class="fas fa-music"></i>
+                </button>
+                <button class="control-btn" id="prevBtn">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button class="control-btn" id="playBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" id="nextEraBtn">
+                    <i class="fas fa-forward"></i>
+                </button>
+            </div>
+            
+            <!-- Sound Effects -->
+            <div class="sound-effects">
+                <button class="sound-btn" id="soundBtn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <span id="progressText">Exploração: 0%</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Container -->
+        <div class="timeline-container">
+            <h3 class="timeline-title">Linha do Tempo da História</h3>
+            <div class="timeline-slider">
+                <input type="range" min="1" max="6" value="1" class="slider" id="timelineSlider">
+                <div class="timeline-labels">
+                    <span>Primeiros Humanos</span>
+                    <span>Civilizações Antigas</span>
+                    <span>Impérios Clássicos</span>
+                    <span>Idade Média</span>
+                    <span>Era das Descobertas</span>
+                    <span>Mundo Moderno</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Achievements Panel -->
+    <div class="achievements" id="achievementsPanel">
+        <h3>Suas Conquistas</h3>
+        <div id="achievementsList">
+            <!-- Achievements will be added by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="backgroundMusic" loop>
+        <!-- We'll use JavaScript to set the source -->
+    </audio>
+    <audio id="clickSound">
+        <!-- We'll use JavaScript to set the source -->
+    </audio>
+    <audio id="correctSound">
+        <!-- We'll use JavaScript to set the source -->
+    </audio>
+    <audio id="achievementSound">
+        <!-- We'll use JavaScript to set the source -->
+    </audio>
+
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            const app = new HistoryAdventure();
+            app.init();
+        });
+        
+        // Main application class
+        class HistoryAdventure {
+            constructor() {
+                // Game state
+                this.currentEra = 1;
+                this.currentStep = 0;
+                this.musicEnabled = true;
+                this.soundEnabled = true;
+                this.speechEnabled = true;
+                this.explorationProgress = 0;
+                this.achievements = [];
+                
+                // Era data
+                this.eras = [
+                    {
+                        id: 1,
+                        name: "Primeiros Humanos",
+                        year: "200.000 - 10.000 a.C.",
+                        description: "Os primeiros humanos surgiram na África e começaram a explorar o mundo!",
+                        color: "#FFD166",
+                        markers: [
+                            {id: 1, x: 50, y: 70, title: "Origem Humana", description: "Os primeiros humanos surgiram aqui na África!", sound: "africa"},
+                            {id: 2, x: 60, y: 60, title: "Pinturas Rupestres", description: "As primeiras formas de arte da humanidade!", sound: "cave"},
+                            {id: 3, x: 75, y: 50, title: "Domesticação do Fogo", description: "Aprender a controlar o fogo foi uma grande conquista!", sound: "fire"}
+                        ],
+                        speech: [
+                            "Olá! Eu sou o Tico! Vamos explorar a história do mundo juntos?",
+                            "Tudo começou na África, onde os primeiros humanos surgiram!",
+                            "Eles eram caçadores-coletores e viviam em pequenos grupos.",
+                            "Com o tempo, aprenderam a fazer ferramentas e a controlar o fogo!"
+                        ]
+                    },
+                    {
+                        id: 2,
+                        name: "Civilizações Antigas",
+                        year: "3.500 - 500 a.C.",
+                        description: "As primeiras grandes civilizações surgiram perto de rios, criando cidades, escrita e leis!",
+                        color: "#FF6B6B",
+                        markers: [
+                            {id: 4, x: 55, y: 50, title: "Egito Antigo", description: "Civilização que construiu as pirâmides e desenvolveu a escrita hieroglífica!", sound: "pyramid"},
+                            {id: 5, x: 60, y: 45, title: "Mesopotâmia", description: "O berço da civilização, onde surgiram as primeiras cidades e a escrita cuneiforme!", sound: "mesopotamia"},
+                            {id: 6, x: 75, y: 45, title: "Vale do Indo", description: "Civilização avançada com planejamento urbano incrível!", sound: "indus"},
+                            {id: 7, x: 80, y: 50, title: "China Antiga", description: "Onde surgiram a escrita chinesa e a filosofia de Confúcio!", sound: "china"}
+                        ],
+                        speech: [
+                            "Agora vamos ver as primeiras grandes civilizações!",
+                            "Elas surgiram perto de rios, que forneciam água e terra fértil.",
+                            "Os egípcios construíram pirâmides impressionantes!",
+                            "Na Mesopotâmia, inventaram a roda e a escrita!"
+                        ]
+                    },
+                    {
+                        id: 3,
+                        name: "Impérios Clássicos",
+                        year: "500 a.C. - 500 d.C.",
+                        description: "Grandes impérios se expandiram, criando estradas, leis e trocando ideias por rotas comerciais!",
+                        color: "#4ECDC4",
+                        markers: [
+                            {id: 8, x: 52, y: 45, title: "Império Romano", description: "Um dos maiores impérios da história, com avançado sistema de leis e estradas!", sound: "rome"},
+                            {id: 9, x: 60, y: 40, title: "Grécia Antiga", description: "Berço da democracia, filosofia e dos Jogos Olímpicos!", sound: "greece"},
+                            {id: 10, x: 75, y: 40, title: "Império Persa", description: "Um vasto império que se estendia do Egito à Índia!", sound: "persia"},
+                            {id: 11, x: 85, y: 45, title: "Dinastia Han", description: "Período de ouro da China, quando a Rota da Seda foi estabelecida!", sound: "silkroad"},
+                            {id: 12, x: 30, y: 55, title: "Civilização Maia", description: "Civilização avançada nas Américas com conhecimentos impressionantes de astronomia!", sound: "maya"}
+                        ],
+                        speech: [
+                            "Agora chegamos aos grandes impérios clássicos!",
+                            "Os romanos construíram estradas que conectavam todo o seu império.",
+                            "Os gregos criaram a democracia e os Jogos Olímpicos!",
+                            "A Rota da Seda conectava a China à Europa, trocando ideias e produtos!"
+                        ]
+                    },
+                    {
+                        id: 4,
+                        name: "Idade Média",
+                        year: "500 - 1500 d.C.",
+                        description: "Um período de castelos, cavaleiros, rotas comerciais e intercâmbio cultural entre diferentes regiões do mundo!",
+                        color: "#1A535C",
+                        markers: [
+                            {id: 13, x: 50, y: 40, title: "Império Bizantino", description: "Continuação do Império Romano no Oriente, guardião do conhecimento clássico!", sound: "byzantium"},
+                            {id: 14, x: 58, y: 45, title: "Império Islâmico", description: "Um vasto califado que preservou e expandiu o conhecimento científico!", sound: "islamic"},
+                            {id: 15, x: 45, y: 35, title: "Reinos Africanos", description: "Impérios ricos como o Mali e Gana, centros de comércio de ouro!", sound: "africa2"},
+                            {id: 16, x: 25, y: 50, title: "Império Inca", description: "Maior império da América pré-colombiana, com cidades nas montanhas!", sound: "inca"},
+                            {id: 17, x: 50, y: 30, title: "Vikings", description: "Grandes navegadores que exploraram desde a América até Constantinopla!", sound: "viking"}
+                        ],
+                        speech: [
+                            "Bem-vindo à Idade Média, tempo de castelos e cavaleiros!",
+                            "Nessa época, diferentes culturas trocavam conhecimento pelas rotas comerciais.",
+                            "Os vikings eram incríveis navegadores que chegaram até a América!",
+                            "Na África, reinos como o Mali eram centros de comércio e cultura!"
+                        ]
+                    },
+                    {
+                        id: 5,
+                        name: "Era das Descobertas",
+                        year: "1500 - 1800 d.C.",
+                        description: "Exploradores europeus navegaram pelos oceanos, conectando continentes e iniciando um intercâmbio global de culturas!",
+                        color: "#9D4EDD",
+                        markers: [
+                            {id: 18, x: 48, y: 42, title: "Rotas Marítimas", description: "Portugueses e espanhóis abriram rotas oceânicas para a Ásia e Américas!", sound: "ship"},
+                            {id: 19, x: 25, y: 55, title: "Encontro de Culturas", description: "O encontro entre europeus e povos das Américas mudou o mundo!", sound: "encounter"},
+                            {id: 20, x: 20, y: 60, title: "Comércio Triangular", description: "Complexa rede de comércio entre Europa, África e Américas!", sound: "trade"},
+                            {id: 21, x: 85, y: 50, title: "Expansão Chinesa", description: "As grandes expedições marítimas da Dinastia Ming!", sound: "ming"}
+                        ],
+                        speech: [
+                            "Agora chegamos à Era das Descobertas!",
+                            "Os navegadores europeus encontraram novas rotas para a Ásia e as Américas.",
+                            "Foi um tempo de encontros entre culturas muito diferentes!",
+                            "Plantas como batata e milho viajaram pelo mundo, mudando a alimentação de todos!"
+                        ]
+                    },
+                    {
+                        id: 6,
+                        name: "Mundo Moderno",
+                        year: "1800 - Hoje",
+                        description: "Revoluções industrial e tecnológica transformaram o mundo, criando uma sociedade global conectada!",
+                        color: "#06D6A0",
+                        markers: [
+                            {id: 22, x: 52, y: 40, title: "Revolução Industrial", description: "Máquinas a vapor e fábricas mudaram a forma como as pessoas viviam e trabalhavam!", sound: "industry"},
+                            {id: 23, x: 75, y: 45, title: "Globalização", description: "O mundo ficou mais conectado através do comércio, viagens e comunicação!", sound: "globalization"},
+                            {id: 24, x: 50, y: 30, title: "Internet", description: "A rede mundial de computadores que conectou o planeta inteiro!", sound: "internet"},
+                            {id: 25, x: 65, y: 50, title: "Exploração Espacial", description: "Humanos pisaram na Lua e exploram o espaço com satélites e telescópios!", sound: "space"}
+                        ],
+                        speech: [
+                            "Chegamos ao mundo moderno!",
+                            "A Revolução Industrial trouxe máquinas que transformaram a produção.",
+                            "Hoje estamos todos conectados pela internet e podemos falar com pessoas do mundo todo!",
+                            "A história continua sendo escrita todos os dias por cada um de nós!"
+                        ]
+                    }
+                ];
+                
+                // Achievements data
+                this.achievementsData = [
+                    {id: 1, name: "Explorador Inicial", description: "Descobriu a origem humana na África", icon: "🏆", earned: false},
+                    {id: 2, name: "Detetive do Passado", description: "Visitou 5 civilizações antigas", icon: "🔍", earned: false},
+                    {id: 3, name: "Viajante do Tempo", description: "Completou todas as eras históricas", icon: "⏱️", earned: false},
+                    {id: 4, name: "Curioso Incansável", description: "Respondeu 3 perguntas corretamente", icon: "❓", earned: false},
+                    {id: 5, name: "Mestre da História", description: "Explorou todos os marcadores do mapa", icon: "🌎", earned: false}
+                ];
+                
+                // Questions data
+                this.questions = [
+                    {
+                        question: "Por que as primeiras civilizações surgiram perto de rios?",
+                        options: [
+                            "Porque os rios forneciam água para beber e terra fértil para plantar",
+                            "Porque os peixes dos rios eram mais saborosos",
+                            "Porque era mais fácil construir casas na água",
+                            "Porque os rios afastavam os animais perigosos"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Qual foi uma importante invenção da Mesopotâmia?",
+                        options: [
+                            "A roda",
+                            "O avião",
+                            "O telefone",
+                            "A lâmpada elétrica"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "O que a Rota da Seda conectava?",
+                        options: [
+                            "A China e a Europa, trocando produtos e ideias",
+                            "O Brasil e a África, trocando frutas",
+                            "A Lua e a Terra, para viagens espaciais",
+                            "Os oceanos Atlântico e Pacífico"
+                        ],
+                        correct: 0
+                    }
+                ];
+                
+                // DOM elements
+                this.worldMap = document.getElementById('world-map');
+                this.timelineSlider = document.getElementById('timelineSlider');
+                this.speechBubble = document.getElementById('speechBubble');
+                this.speechText = document.getElementById('speechText');
+                this.ticoCharacter = document.getElementById('ticoCharacter');
+                this.eraOverlay = document.getElementById('eraOverlay');
+                this.eraTitle = document.getElementById('eraTitle');
+                this.eraDescription = document.getElementById('eraDescription');
+                this.questionPopup = document.getElementById('questionPopup');
+                this.questionText = document.getElementById('questionText');
+                this.questionOptions = document.getElementById('questionOptions');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                this.achievementsPanel = document.getElementById('achievementsPanel');
+                this.achievementsList = document.getElementById('achievementsList');
+                
+                // Audio elements
+                this.backgroundMusic = document.getElementById('backgroundMusic');
+                this.clickSound = document.getElementById('clickSound');
+                this.correctSound = document.getElementById('correctSound');
+                this.achievementSound = document.getElementById('achievementSound');
+                
+                // Create audio sources (using free sounds from the web)
+                this.setupAudio();
+            }
+            
+            // Initialize the application
+            init() {
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                // Initialize the map with first era
+                this.loadEra(1);
+                
+                // Show initial speech
+                setTimeout(() => {
+                    this.showSpeechBubble(this.eras[0].speech[0]);
+                    this.speak(this.eras[0].speech[0]);
+                }, 1000);
+                
+                // Start background music
+                if (this.musicEnabled) {
+                    setTimeout(() => {
+                        this.playBackgroundMusic();
+                    }, 1500);
+                }
+                
+                // Initialize achievements
+                this.renderAchievements();
+                
+                // Set up periodic questions
+                setInterval(() => {
+                    if (Math.random() > 0.7 && !this.questionPopup.style.display) {
+                        this.showRandomQuestion();
+                    }
+                }, 30000);
+            }
+            
+            // Set up audio sources
+            setupAudio() {
+                // Background music - using a free cheerful melody
+                // In a real implementation, you would use actual audio files
+                // For this demo, we'll simulate with available online resources
+                console.log("Audio would be loaded here in a real implementation");
+                
+                // Set up click sound (using a simple beep)
+                this.clickSound.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+                
+                // For a real implementation, you would need actual audio files
+            }
+            
+            // Set up all event listeners
+            setupEventListeners() {
+                // Timeline slider
+                this.timelineSlider.addEventListener('input', (e) => {
+                    const era = parseInt(e.target.value);
+                    if (era !== this.currentEra) {
+                        this.loadEra(era);
+                    }
+                });
+                
+                // Navigation buttons
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.loadEra(1);
+                    this.showSpeechBubble("Vamos começar nossa aventura pelo tempo!");
+                    this.speak("Vamos começar nossa aventura pelo tempo!");
+                });
+                
+                document.getElementById('achievementsBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.toggleAchievementsPanel();
+                });
+                
+                document.getElementById('helpBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.showSpeechBubble("Clique nos marcadores coloridos para aprender fatos históricos! Use a linha do tempo para viajar no tempo!");
+                    this.speak("Clique nos marcadores coloridos para aprender fatos históricos! Use a linha do tempo para viajar no tempo!");
+                });
+                
+                // Speech controls
+                document.getElementById('speakBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.speak(this.speechText.textContent);
+                });
+                
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.nextSpeech();
+                });
+                
+                // Era overlay
+                document.getElementById('closeEraBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.eraOverlay.style.display = 'none';
+                });
+                
+                // Question popup
+                document.getElementById('closeQuestionBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.questionPopup.style.display = 'none';
+                });
+                
+                // Control buttons
+                document.getElementById('musicBtn').addEventListener('click', () => {
+                    this.toggleMusic();
+                });
+                
+                document.getElementById('soundBtn').addEventListener('click', () => {
+                    this.toggleSound();
+                });
+                
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    if (this.currentEra > 1) {
+                        this.loadEra(this.currentEra - 1);
+                    }
+                });
+                
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.startAutoPlay();
+                });
+                
+                document.getElementById('nextEraBtn').addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    if (this.currentEra < this.eras.length) {
+                        this.loadEra(this.currentEra + 1);
+                    }
+                });
+                
+                // Close achievements panel when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.achievements') && !e.target.closest('#achievementsBtn')) {
+                        this.achievementsPanel.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Load a specific historical era
+            loadEra(eraId) {
+                this.currentEra = eraId;
+                this.currentStep = 0;
+                
+                // Update timeline slider
+                this.timelineSlider.value = eraId;
+                
+                // Get era data
+                const era = this.eras.find(e => e.id === eraId);
+                
+                // Show era overlay
+                this.eraTitle.textContent = era.name;
+                this.eraDescription.textContent = `${era.year}: ${era.description}`;
+                this.eraOverlay.style.display = 'flex';
+                
+                // Clear existing markers
+                this.worldMap.innerHTML = '';
+                this.worldMap.appendChild(this.ticoCharacter);
+                
+                // Add character back to map
+                this.ticoCharacter.style.left = '50%';
+                this.ticoCharacter.style.bottom = '20px';
+                
+                // Add speech bubble back to map
+                this.worldMap.appendChild(this.speechBubble);
+                
+                // Set map background color
+                this.worldMap.style.backgroundColor = era.color;
+                
+                // Add markers for this era
+                era.markers.forEach(marker => {
+                    this.createMarker(marker);
+                });
+                
+                // Update progress
+                this.updateProgress();
+                
+                // Speak era introduction
+                setTimeout(() => {
+                    this.showSpeechBubble(era.speech[0]);
+                    this.speak(era.speech[0]);
+                }, 500);
+                
+                // Check for achievements
+                this.checkAchievements();
+                
+                // Play era transition sound
+                this.playSound(this.clickSound);
+            }
+            
+            // Create a marker on the map
+            createMarker(markerData) {
+                const marker = document.createElement('div');
+                marker.className = 'event-marker';
+                marker.style.left = `${markerData.x}%`;
+                marker.style.top = `${markerData.y}%`;
+                marker.innerHTML = '<i class="fas fa-star"></i>';
+                marker.dataset.id = markerData.id;
+                marker.dataset.title = markerData.title;
+                marker.dataset.description = markerData.description;
+                
+                marker.addEventListener('click', () => {
+                    this.playSound(this.clickSound);
+                    this.showSpeechBubble(`<strong>${markerData.title}:</strong> ${markerData.description}`);
+                    this.speak(`${markerData.title}: ${markerData.description}`);
+                    
+                    // Move character to marker
+                    this.moveCharacterTo(markerData.x, markerData.y);
+                    
+                    // Increase exploration progress
+                    this.explorationProgress += 2;
+                    this.updateProgress();
+                    
+                    // Check for achievements
+                    this.checkAchievements();
+                });
+                
+                this.worldMap.appendChild(marker);
+            }
+            
+            // Move character to a specific position
+            moveCharacterTo(x, y) {
+                // Calculate position relative to character size
+                const charX = Math.max(10, Math.min(90, x - 5));
+                const charY = Math.max(10, Math.min(80, y + 10));
+                
+                this.ticoCharacter.style.left = `${charX}%`;
+                this.ticoCharacter.style.top = `${charY}%`;
+                this.ticoCharacter.style.bottom = 'auto';
+            }
+            
+            // Show speech bubble with text
+            showSpeechBubble(text) {
+                this.speechText.innerHTML = text;
+                this.speechBubble.style.display = 'block';
+            }
+            
+            // Hide speech bubble
+            hideSpeechBubble() {
+                this.speechBubble.style.display = 'none';
+            }
+            
+            // Speak text using Web Speech API
+            speak(text) {
+                if (!this.speechEnabled) return;
+                
+                // Clean text from HTML tags
+                const cleanText = text.replace(/<[^>]*>/g, '');
+                
+                if ('speechSynthesis' in window) {
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    // Create speech utterance
+                    const utterance = new SpeechSynthesisUtterance(cleanText);
+                    
+                    // Configure voice for Brazilian Portuguese
+                    utterance.lang = 'pt-BR';
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.2; // Slightly higher pitch for child-like voice
+                    utterance.volume = 1.0;
+                    
+                    // Speak the text
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    console.log("Speech synthesis not supported");
+                }
+            }
+            
+            // Move to next speech in current era
+            nextSpeech() {
+                const era = this.eras.find(e => e.id === this.currentEra);
+                if (era && era.speech) {
+                    this.currentStep++;
+                    if (this.currentStep >= era.speech.length) {
+                        this.currentStep = 0;
+                    }
+                    this.showSpeechBubble(era.speech[this.currentStep]);
+                    this.speak(era.speech[this.currentStep]);
+                }
+            }
+            
+            // Play background music
+            playBackgroundMusic() {
+                if (this.musicEnabled) {
+                    // In a real implementation, you would play actual music
+                    // For this demo, we'll just log it
+                    console.log("Background music playing");
+                    document.getElementById('musicBtn').classList.add('active');
+                }
+            }
+            
+            // Stop background music
+            stopBackgroundMusic() {
+                console.log("Background music stopped");
+                document.getElementById('musicBtn').classList.remove('active');
+            }
+            
+            // Toggle music on/off
+            toggleMusic() {
+                this.musicEnabled = !this.musicEnabled;
+                const musicBtn = document.getElementById('musicBtn');
+                
+                if (this.musicEnabled) {
+                    this.playBackgroundMusic();
+                    musicBtn.innerHTML = '<i class="fas fa-music"></i>';
+                } else {
+                    this.stopBackgroundMusic();
+                    musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                }
+                
+                this.playSound(this.clickSound);
+            }
+            
+            // Toggle sound effects on/off
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                const soundBtn = document.getElementById('soundBtn');
+                
+                if (this.soundEnabled) {
+                    soundBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                } else {
+                    soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                }
+                
+                // Play sound even when toggling off to provide feedback
+                this.clickSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+            
+            // Toggle speech on/off
+            toggleSpeech() {
+                this.speechEnabled = !this.speechEnabled;
+            }
+            
+            // Play a sound effect
+            playSound(audioElement) {
+                if (!this.soundEnabled) return;
+                
+                try {
+                    // Clone and play to allow overlapping sounds
+                    const clone = audioElement.cloneNode();
+                    clone.play().catch(e => console.log("Audio play failed:", e));
+                } catch (e) {
+                    console.log("Error playing sound:", e);
+                }
+            }
+            
+            // Update exploration progress
+            updateProgress() {
+                // Cap progress at 100%
+                if (this.explorationProgress > 100) {
+                    this.explorationProgress = 100;
+                }
+                
+                // Update progress bar
+                this.progressFill.style.width = `${this.explorationProgress}%`;
+                this.progressText.textContent = `Exploração: ${Math.round(this.explorationProgress)}%`;
+                
+                // Check for achievement
+                if (this.explorationProgress >= 100 && !this.achievementsData[4].earned) {
+                    this.earnAchievement(4);
+                }
+            }
+            
+            // Show random question
+            showRandomQuestion() {
+                const randomQuestion = this.questions[Math.floor(Math.random() * this.questions.length)];
+                this.questionText.textContent = randomQuestion.question;
+                
+                // Clear previous options
+                this.questionOptions.innerHTML = '';
+                
+                // Add new options
+                randomQuestion.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'question-option';
+                    optionElement.textContent = option;
+                    optionElement.addEventListener('click', () => {
+                        this.answerQuestion(index, randomQuestion.correct);
+                    });
+                    this.questionOptions.appendChild(optionElement);
+                });
+                
+                // Show popup
+                this.questionPopup.style.display = 'block';
+            }
+            
+            // Handle question answer
+            answerQuestion(selected, correct) {
+                if (selected === correct) {
+                    this.questionText.textContent = "Correto! Parabéns!";
+                    this.playSound(this.correctSound);
+                    
+                    // Increase progress
+                    this.explorationProgress += 5;
+                    this.updateProgress();
+                    
+                    // Check for achievement
+                    let correctCount = 0;
+                    // In a real implementation, you'd track actual correct answers
+                    // For demo, we'll just award after first correct answer
+                    if (!this.achievementsData[3].earned) {
+                        this.earnAchievement(3);
+                    }
+                } else {
+                    this.questionText.textContent = "Quase! Vamos aprender mais juntos!";
+                }
+                
+                // Hide after delay
+                setTimeout(() => {
+                    this.questionPopup.style.display = 'none';
+                }, 2000);
+            }
+            
+            // Toggle achievements panel
+            toggleAchievementsPanel() {
+                if (this.achievementsPanel.style.display === 'block') {
+                    this.achievementsPanel.style.display = 'none';
+                } else {
+                    this.achievementsPanel.style.display = 'block';
+                    this.renderAchievements();
+                }
+            }
+            
+            // Render achievements list
+            renderAchievements() {
+                this.achievementsList.innerHTML = '';
+                
+                this.achievementsData.forEach(achievement => {
+                    const achievementElement = document.createElement('div');
+                    achievementElement.className = 'achievement-item';
+                    
+                    if (achievement.earned) {
+                        achievementElement.innerHTML = `
+                            <div class="achievement-icon">${achievement.icon}</div>
+                            <div>
+                                <strong>${achievement.name}</strong><br>
+                                <small>${achievement.description}</small>
+                            </div>
+                        `;
+                    } else {
+                        achievementElement.innerHTML = `
+                            <div class="achievement-icon">?</div>
+                            <div>
+                                <strong>Conquista Bloqueada</strong><br>
+                                <small>Continue explorando para desbloquear</small>
+                            </div>
+                        `;
+                        achievementElement.style.opacity = '0.6';
+                    }
+                    
+                    this.achievementsList.appendChild(achievementElement);
+                });
+            }
+            
+            // Earn an achievement
+            earnAchievement(achievementId) {
+                if (achievementId >= 0 && achievementId < this.achievementsData.length) {
+                    if (!this.achievementsData[achievementId].earned) {
+                        this.achievementsData[achievementId].earned = true;
+                        this.renderAchievements();
+                        
+                        // Show notification
+                        this.showSpeechBubble(`🎉 Conquista desbloqueada: ${this.achievementsData[achievementId].name}!`);
+                        this.speak(`Parabéns! Você desbloqueou a conquista ${this.achievementsData[achievementId].name}!`);
+                        
+                        // Play achievement sound
+                        this.playSound(this.achievementSound);
+                    }
+                }
+            }
+            
+            // Check for achievements
+            checkAchievements() {
+                // Check for "Explorador Inicial" achievement
+                if (this.currentEra >= 1 && !this.achievementsData[0].earned) {
+                    this.earnAchievement(0);
+                }
+                
+                // Check for "Detetive do Passado" achievement
+                if (this.explorationProgress >= 20 && !this.achievementsData[1].earned) {
+                    this.earnAchievement(1);
+                }
+                
+                // Check for "Viajante do Tempo" achievement
+                if (this.currentEra >= 6 && !this.achievementsData[2].earned) {
+                    this.earnAchievement(2);
+                }
+            }
+            
+            // Start autoplay mode
+            startAutoPlay() {
+                let eraIndex = 1;
+                
+                const playNextEra = () => {
+                    if (eraIndex > this.eras.length) {
+                        eraIndex = 1;
+                    }
+                    
+                    this.loadEra(eraIndex);
+                    eraIndex++;
+                };
+                
+                // Start with first era
+                playNextEra();
+                
+                // Set interval for autoplay
+                this.autoplayInterval = setInterval(playNextEra, 15000);
+                
+                // Change button to stop
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-stop"></i>';
+                document.getElementById('playBtn').onclick = () => {
+                    clearInterval(this.autoplayInterval);
+                    document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
+                    document.getElementById('playBtn').onclick = () => this.startAutoPlay();
+                    this.playSound(this.clickSound);
+                };
+            }
+        }
+    </script>
+</body>
+</html>
