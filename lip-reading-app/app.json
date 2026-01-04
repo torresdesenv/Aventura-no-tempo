@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "LipRead Translator",
+    "slug": "lip-reading-translator",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6366f1"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.lipreadingtranslator",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to perform real-time lip reading",
+        "NSMicrophoneUsageDescription": "This app needs microphone access for audio processing",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload videos"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6366f1"
+      },
+      "package": "com.yourcompany.lipreadingtranslator",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for lip reading"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to upload videos",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save videos"
+        }
+      ]
+    ]
+  }
+}
