@@ -1,136 +1,176 @@
 /**
  * Lip Reading Service
  *
- * This service handles lip reading using ML models.
- * In production, you would integrate with:
- * - LipNet model
- * - Google Cloud Video Intelligence API
- * - Azure Video Analyzer
- * - Custom trained models
+ * This service connects to the Flask API backend for actual lip reading processing
  */
 
-import * as tf from '@tensorflow/tfjs';
+// Use the PC's IP address instead of localhost for mobile testing
+const API_URL = 'http://192.168.0.165:5000/api';
 
 class LipReadingService {
   constructor() {
-    this.model = null;
-    this.isModelLoaded = false;
+    this.isProcessing = false;
   }
 
   /**
-   * Initialize and load the lip reading model
-   */
-  async loadModel() {
-    try {
-      // In production, load your trained model here
-      // this.model = await tf.loadLayersModel('path/to/model.json');
-
-      // For demo purposes, we'll simulate model loading
-      console.log('Loading lip reading model...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.isModelLoaded = true;
-      console.log('Lip reading model loaded successfully');
-
-      return true;
-    } catch (error) {
-      console.error('Error loading lip reading model:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Process video frames for lip reading
-   * @param {Array} frames - Array of video frames
-   * @param {Object} faceRegion - Face bounding box coordinates
+   * Process video file for lip reading
+   * @param {string} videoUri - URI of the video file
    * @returns {Promise<Object>} - Recognized text and confidence
    */
-  async processFrames(frames, faceRegion) {
-    if (!this.isModelLoaded) {
-      await this.loadModel();
+  async processVideo(videoUri) {
+    if (this.isProcessing) {
+      throw new Error('Already processing a video');
     }
 
     try {
-      // In production, you would:
-      // 1. Extract lip region from frames using face landmarks
-      // 2. Preprocess frames (normalize, resize, etc.)
-      // 3. Pass frames through the lip reading model
-      // 4. Decode output to text
+      this.isProcessing = true;
+      console.log('Processing video:', videoUri);
 
-      // For demo, simulate processing
-      console.log('Processing frames for lip reading...');
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Convert video URI to blob for upload
+      const blob = await this.dataURItoBlob(videoUri);
 
-      // Simulate different texts based on frame count
-      const demoTexts = [
-        'Olá, como você está?',
-        'Bom dia!',
-        'Tudo bem com você?',
-        'Muito prazer em conhecê-lo',
-        'Até logo!',
-      ];
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('video', blob, 'video.mp4');
 
-      const randomText = demoTexts[Math.floor(Math.random() * demoTexts.length)];
-      const confidence = 0.75 + Math.random() * 0.2; // Random confidence between 0.75-0.95
+      console.log('Uploading to:', `${API_URL}/process-video`);
+
+      // Send video to Flask API
+      const response = await fetch(`${API_URL}/process-video`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('API Response:', result);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Processing failed');
+      }
 
       return {
-        text: randomText,
-        confidence: confidence,
+        text: result.text,
+        confidence: result.confidence,
+        timestamp: Date.now(),
+        facesDetected: result.faces_detected || 1,
+      };
+    } catch (error) {
+      console.error('Error processing video:', error);
+      throw error;
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  /**
+   * Process real-time camera frame
+   * @param {string} frameUri - URI of the camera frame
+   * @returns {Promise<Object>} - Real-time recognized text
+   */
+  async processRealtimeFrame(frameUri) {
+    try {
+      console.log('Processing realtime frame');
+
+      // Convert frame URI to blob
+      const blob = await this.dataURItoBlob(frameUri);
+
+      const formData = new FormData();
+      formData.append('frame', blob, 'frame.jpg');
+
+      const response = await fetch(`${API_URL}/process-frame`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Processing failed');
+      }
+
+      return {
+        text: result.text,
+        confidence: result.confidence,
         timestamp: Date.now(),
       };
     } catch (error) {
-      console.error('Error processing frames:', error);
+      console.error('Error processing realtime frame:', error);
       throw error;
     }
   }
 
   /**
-   * Process real-time video stream
-   * @param {Object} videoFrame - Current video frame
-   * @param {Object} faceRegion - Face bounding box
-   * @returns {Promise<Object>} - Real-time recognized text
+   * Convert data URI to Blob
+   * @param {string} dataURI - Data URI string
+   * @returns {Promise<Blob>} - Blob object
    */
-  async processRealtimeFrame(videoFrame, faceRegion) {
-    // In production, implement real-time processing with buffering
-    // Collect frames in a sliding window and process periodically
-
+  async dataURItoBlob(dataURI) {
     try {
-      // Demo implementation
-      const result = await this.processFrames([videoFrame], faceRegion);
-      return result;
+      // If it's already a file URI (expo-image-picker format)
+      if (dataURI.startsWith('file://') || dataURI.startsWith('content://')) {
+        const response = await fetch(dataURI);
+        return await response.blob();
+      }
+
+      // If it's a data URI (base64)
+      if (dataURI.startsWith('data:')) {
+        const response = await fetch(dataURI);
+        return await response.blob();
+      }
+
+      // If it's an HTTP URL
+      if (dataURI.startsWith('http://') || dataURI.startsWith('https://')) {
+        const response = await fetch(dataURI);
+        return await response.blob();
+      }
+
+      throw new Error('Unsupported URI format');
     } catch (error) {
-      console.error('Error in realtime processing:', error);
+      console.error('Error converting URI to blob:', error);
       throw error;
     }
   }
 
   /**
-   * Extract lip region from face
-   * @param {Object} frame - Video frame
-   * @param {Object} faceLandmarks - Facial landmarks
-   * @returns {Object} - Cropped lip region
+   * Test connection to the API server
+   * @returns {Promise<boolean>} - True if server is reachable
    */
-  extractLipRegion(frame, faceLandmarks) {
-    // In production, use face landmarks to extract lip region
-    // Example using MediaPipe or similar:
-    // - Get mouth landmarks (points 48-68 in 68-point model)
-    // - Calculate bounding box around mouth
-    // - Crop and return the region
+  async testConnection() {
+    try {
+      const response = await fetch(`${API_URL}/health`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
-    return {
-      region: frame,
-      coordinates: faceLandmarks.mouth,
-    };
+      return response.ok;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
   }
 
   /**
-   * Clean up resources
+   * Get the current API URL (for debugging)
    */
-  dispose() {
-    if (this.model) {
-      this.model.dispose();
-      this.model = null;
-      this.isModelLoaded = false;
-    }
+  getApiUrl() {
+    return API_URL;
   }
 }
 
